@@ -16,6 +16,6 @@ Last Update:
 
 -Sever Name
 
--Added Command Exexuting System.(NEW)
+-Added Command Executing System.(NEW)
 
 -Fixed Bugs...
