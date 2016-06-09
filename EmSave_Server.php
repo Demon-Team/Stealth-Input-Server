@@ -4,6 +4,8 @@
 #You Can Connect From NetCat To The Script.
 #run: php -q script.php ip port
 #input any for any ip
+#now use # in the beginning of your input to run command(client side).
+#Example: #exit , #server.shutdown
 if (isset($argv[1]) && isset($argv[2]))
 {
 	$argv_set = true;
@@ -59,13 +61,13 @@ else
 		{
 			echo "[#]Something Has Gone Wrong With The Config File.\n[+]Delete It And Start Again Or Try To Fix It\n";
 		}
-
 		echo "[+]Config Loaded Successfully.\n";
 		$port = $argv[2];
-		$welcome_message = "[+]Welcome To PHP Emergency Save Service.\n[+]Everything You Input Will Be Hash Saved And The Session Will Leave No Log.\n[+]Stealth Session Started\n[+]Input:\n";
+		$welcome_message = "[.:$name:.]\n[+]Welcome To PHP Emergency Save Service.\n[+]Everything You Input Will Be Hash Saved And The Session Will Leave No Log.\n[+]Stealth Session Started\n[+]Input:\n";
 		$isshut = FALSE;
 		set_time_limit(0);
 		echo "[Emergency Save Server]\n";
+		echo "[.:$name:.]\n";
 		while(true)
 		{
 			$lsock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
@@ -79,6 +81,7 @@ else
 			socket_getpeername($accsock, $caddress, $cport);
 			echo "[+]Recived Connection Request From : $caddress  \n";
 			$handle = fopen($outputfile, "a");
+			fwrite($handle, "[.:$name:.]\n", strlen("[.:$name:.]\n"));
 			fwrite($handle, "Connection From : $caddress \n", strlen("Connection From : $caddress \n"));
 			socket_write($accsock,"[+]Enter Serevr's Password: " ,strlen("[+]Enter Serevr's Password: "));
 			$input_password = $input = socket_read($accsock, 2048);
@@ -93,31 +96,40 @@ else
 				{
 					$input = socket_read($accsock, 1024);
 					$input = trim($input);
-					if ($input == "exit")
+					if (substr($input, 0,1) == "#")
 					{
-						fwrite($handle, "[+]Exit Command Recived.\n[+]Socket Terminated.\n", strlen("[+]Exit Command Recived.\n[+]Socket Terminated.\n"));
-						echo "[+]Exit Command Recived.\n";
-					    socket_write($accsock, "[+]All Inputes Saved.\n", strlen("[+]All Iputes Saved.\n"));
-					    socket_write($accsock, "[+]Socket Terminated.\n", strlen("[+]Socket Terminated.\n"));
-						echo "[+]Terminating Socket.\n";
-						socket_close($accsock);
-						break;
-					}
-					elseif ($input == "server.shutdown")
-					{
-						echo "\n";
-						echo "[+]Server Shutdown Signal Recived.\n[+]Shuting Down The Server.\n[+]All Connections Will Be Closed.\n";
-						socket_write($accsock, "[+]Server Shutdown Signal Recived.\n[+]All Inputes Saved.\n", strlen("[+]Server Shutdown Signal Recived.\n[+]All Inputes Saved.\n"));
-					    socket_write($accsock, "[+]Socket Terminated.\n", strlen("[+]Socket Terminated.\n"));
-						$isshut = TRUE;
-						break;
+						if ($input == "#exit")
+						{
+							fwrite($handle, "[+]Exit Command Recived.\n[+]Socket Terminated.\n", strlen("[+]Exit Command Recived.\n[+]Socket Terminated.\n"));
+							echo "[+]Exit Command Recived.\n";
+						    socket_write($accsock, "[+]All Inputes Saved.\n", strlen("[+]All Iputes Saved.\n"));
+						    socket_write($accsock, "[+]Socket Terminated.\n", strlen("[+]Socket Terminated.\n"));
+							echo "[+]Terminating Socket.\n";
+							socket_close($accsock);
+							break;
+						}
+						elseif ($input == "#server.shutdown")
+						{
+							echo "\n";
+							echo "[+]Server Shutdown Signal Recived.\n[+]Shuting Down The Server.\n[+]All Connections Will Be Closed.\n";
+							socket_write($accsock, "[+]Server Shutdown Signal Recived.\n[+]All Inputes Saved.\n", strlen("[+]Server Shutdown Signal Recived.\n[+]All Inputes Saved.\n"));
+							fwrite($handle, "[+]Server Shutdown Signal Recived.\n[+]All Inputes Saved.\n", strlen("[+]Server Shutdown Signal Recived.\n[+]All Inputes Saved.\n"));
+						    socket_write($accsock, "[+]Socket Terminated.\n", strlen("[+]Socket Terminated.\n"));
+							$isshut = TRUE;
+							break;
+						}
+						else
+						{
+							echo "[#]Command Not Found!\n";
+							socket_write($accsock, "[#]Command Not Found!\n", strlen("[#]Command Not Found!\n"));						
+						}
 					}
 					else
 					{
 						$write = "[+]User Input: " . $input . "\n";
 						echo $write;
-						fwrite($handle, $write, strlen($write));
-					} 
+						fwrite($handle, $write, strlen($write)); 
+					}
 				} while(true);
 				socket_close($lsock);
 				fclose($handle);
